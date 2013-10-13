@@ -41,14 +41,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Records\InventoryRecord.cs" />
+    <Compile Include="RecordTypes\InventoryRecord.cs" />
+    <Compile Include="RecordTypes\RecordDatabase.cs" />
     <Compile Include="Shell.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WSUASTIS.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <Compile Include="Records\Transaction.cs" />
+    <Compile Include="RecordTypes\Transaction.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Records\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

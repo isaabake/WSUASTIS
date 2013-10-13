@@ -4,15 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WSUASTIS
+namespace WSUASTIS.RecordTypes
 {
-    enum Type { Sale, Return }
+    public enum Type { Sale, Return }
 
-    class Transaction
+    public class Transaction
     {
 		public Type Type;
         public uint TransactionID;
-        public IList<InventoryRecord> Items;
+        public List<InventoryRecord> Items;
         public int Amount;
     }
 }

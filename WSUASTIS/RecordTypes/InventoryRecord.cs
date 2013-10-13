@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WSUASTIS
+namespace WSUASTIS.RecordTypes
 {
     public class InventoryRecord
     {
