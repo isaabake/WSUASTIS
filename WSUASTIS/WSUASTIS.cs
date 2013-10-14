@@ -133,7 +133,7 @@ namespace WSUASTIS
             Console.WriteLine();
 
             IEnumerable<InventoryRecord> match = RecordDB.Inventory.Where(p => p.Title.Contains(search) || p.Category.Contains(search) || p.Subcategory.Contains(search));
-            
+
             if (match.Count() == 0)
             {
                 Console.WriteLine("Nothing matched your search...");
@@ -167,7 +167,37 @@ namespace WSUASTIS
         /// </summary>
         private void StartTransaction()
         {
-            TransactionType type = TransactionType.Sale;
+            Transaction transaction = new Transaction();
+
+            char input = '0';
+            //Inventory Editor
+            do
+            {
+                PrintHeader();
+                Console.WriteLine("New Transaction");
+                Console.WriteLine("1) Sale");
+                Console.WriteLine("2) Return");
+                Console.WriteLine("0) Exit");
+                Console.WriteLine();
+                Console.Write("Enter selection: ");
+
+                input = Console.ReadKey(true).KeyChar;
+                while (input != '1' && input != '2' && input != '0')
+                {
+                    input = Console.ReadKey(true).KeyChar;
+                }
+                Console.WriteLine();
+
+                if (input == '1')
+                {
+                    transaction.Type = TransactionType.Sale;
+                    
+                }
+                else if (input == '2')
+                {
+                    transaction.Type = TransactionType.Return;
+                }
+            } while (input != '0');
         }
 
         /// <summary>
@@ -233,7 +263,7 @@ namespace WSUASTIS
                 Console.WriteLine("Invalid password...");
                 return;
             }
-            
+
             User = UserType.Manager;
 
             char input = '0';
@@ -245,9 +275,9 @@ namespace WSUASTIS
                 Console.WriteLine("1) Add New Item");
                 Console.WriteLine("2) Edit Existing Item");
                 Console.WriteLine("0) Exit");
-                 Console.WriteLine();
+                Console.WriteLine();
                 Console.Write("Enter selection: ");
-                
+
                 input = Console.ReadKey(true).KeyChar;
                 while (input != '1' && input != '2' && input != '0')
                 {
@@ -338,7 +368,7 @@ namespace WSUASTIS
             } while (input != '0');
 
             User = UserType.Employee;
-            
+
         }
 
     }
