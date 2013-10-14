@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace WSUASTIS.RecordTypes
 {
-    public enum Type { Sale, Return }
+    public enum TransactionType { Sale, Return }
 
     public class Transaction
     {
-		public Type Type;
+		public TransactionType Type;
         public uint TransactionID;
         public List<InventoryRecord> Items;
-        public int Amount;
+        public double Amount;
     }
 }

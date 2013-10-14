@@ -13,7 +13,7 @@ namespace WSUASTIS.RecordTypes
         public string Category;
         public string Subcategory;
         public uint Quantity;
-        public uint Price;
+        public double Price;
         public uint PID;
     }
 }

@@ -45,7 +45,7 @@ namespace WSUASTIS
         }
 
         /// <summary>
-        /// Starts the system
+        /// Starts the system.
         /// </summary>
         public void Run()
         {
@@ -87,6 +87,9 @@ namespace WSUASTIS
             } while (input != '0');
         }
 
+        /// <summary>
+        /// Saves all changes to the database
+        /// </summary>
         private void SaveDatabaseChanges()
         {
             try
@@ -104,6 +107,9 @@ namespace WSUASTIS
             }
         }
 
+        /// <summary>
+        /// Prints Console header
+        /// </summary>
         private void PrintHeader()
         {
             Console.Clear();
@@ -114,11 +120,14 @@ namespace WSUASTIS
             Console.WriteLine();
         }
 
+        /// <summary>
+        /// Search inventory by name, category, or subcategory
+        /// </summary>
         private void InventorySearch()
         {
             string search = string.Empty;
             PrintHeader();
-            Console.WriteLine("Inventory Search ");
+            Console.WriteLine("Inventory Search");
             Console.Write("Enter item's name, category, or subcategory: ");
             search = Console.ReadLine();
             Console.WriteLine();
@@ -153,8 +162,64 @@ namespace WSUASTIS
 
         }
 
+        /// <summary>
+        /// Start a sale or return transaction
+        /// </summary>
         private void StartTransaction()
         {
+            TransactionType type = TransactionType.Sale;
+        }
+
+        /// <summary>
+        /// Prints a Receipt to a file for a transaction
+        /// </summary>
+        private void PrintReceipt()
+        {
+            int TransactionID;
+            Console.WriteLine();
+            Console.Write("Enter TransactionID to print receipt: ");
+            while (!int.TryParse(Console.ReadLine(), out TransactionID))
+            {
+                Console.Write("Please enter a valid TransactionID number: ");
+            }
+            Transaction trans = RecordDB.Transactions.Find(t => t.TransactionID == TransactionID);  //Find transaction
+            if (trans == null)
+            {
+                Console.WriteLine("Could not find a Transaction with TransactionID = {0}", TransactionID);
+            }
+            else
+            {
+                using (StreamWriter receiptFile = new StreamWriter(string.Format("receipt_{0}.txt", TransactionID)))
+                {
+                    receiptFile.WriteLine("Transaction ID:\t{0}", trans.TransactionID);
+                    receiptFile.WriteLine("Transaction Type:\t{0}", trans.Type.ToString());
+                    receiptFile.WriteLine();
+                    receiptFile.WriteLine("Items");
+                    receiptFile.WriteLine("-------------------------------------------------");
+                    foreach (InventoryRecord item in trans.Items)
+                    {
+                        receiptFile.WriteLine("Item:\t\t{0}", item.Title);
+                        receiptFile.WriteLine("Description:\t{0}", item.Description);
+                        receiptFile.WriteLine("Category:\t{0}", item.Category);
+                        receiptFile.WriteLine("Subcategory:\t{0}", item.Subcategory);
+                        receiptFile.WriteLine("Quantity:\t{0}", item.Quantity);
+                        receiptFile.WriteLine("Price:\t\t{0}", item.Price);
+                        receiptFile.WriteLine("PID:\t\t{0}", item.PID);
+                        receiptFile.WriteLine();
+                    }
+                    receiptFile.WriteLine("-------------------------------------------------");
+                    receiptFile.WriteLine();
+                    receiptFile.WriteLine("Total Amount:\t\t{0}", trans.Amount);
+
+                    receiptFile.Close();
+                }
+
+                Console.WriteLine();
+                Console.WriteLine("Receipt printed: \"receipt_{0}.txt\"", TransactionID);
+                Console.WriteLine("Press any key to return to Main Menu...");
+                Console.ReadKey(true);
+
+            }
         }
 
         /// <summary>
@@ -180,7 +245,7 @@ namespace WSUASTIS
                 Console.WriteLine("1) Add New Item");
                 Console.WriteLine("2) Edit Existing Item");
                 Console.WriteLine("0) Exit");
-                Console.WriteLine();
+                 Console.WriteLine();
                 Console.Write("Enter selection: ");
                 
                 input = Console.ReadKey(true).KeyChar;
@@ -259,9 +324,9 @@ namespace WSUASTIS
                 }
                 item.Quantity = quantity;
 
-                uint price = 0;
+                double price = 0;
                 Console.Write("Price: ");
-                while (!uint.TryParse(Console.ReadLine(), out price))
+                while (!double.TryParse(Console.ReadLine(), out price))
                 {
                     Console.Write("Please enter a valid Price: ");
                 }
