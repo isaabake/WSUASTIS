@@ -14,5 +14,13 @@ namespace WSUASTIS.RecordTypes
         public uint TransactionID;
         public List<InventoryRecord> Items;
         public double Amount;
+
+        /// <summary>
+        /// Initializes Items list
+        /// </summary>
+        public Transaction()
+        {
+            Items = new List<InventoryRecord>();
+        }
     }
 }

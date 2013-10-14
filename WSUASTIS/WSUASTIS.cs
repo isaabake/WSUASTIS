@@ -167,14 +167,12 @@ namespace WSUASTIS
         /// </summary>
         private void StartTransaction()
         {
-            Transaction transaction = new Transaction();
-
             char input = '0';
             //Inventory Editor
             do
             {
                 PrintHeader();
-                Console.WriteLine("New Transaction");
+                Console.WriteLine("Transaction Menu");
                 Console.WriteLine("1) Sale");
                 Console.WriteLine("2) Return");
                 Console.WriteLine("0) Exit");
@@ -188,15 +186,205 @@ namespace WSUASTIS
                 }
                 Console.WriteLine();
 
+                Transaction newTransaction = new Transaction();
+                if (RecordDB.Transactions.Count == 0)
+                {
+                    newTransaction.TransactionID = 1;
+                }
+                else
+                {
+                    newTransaction.TransactionID = RecordDB.Transactions.Max(t => t.TransactionID) + 1; //Generate the next sequential ID
+                }
+
+                //Sale transaction
                 if (input == '1')
                 {
-                    transaction.Type = TransactionType.Sale;
-                    
+                    newTransaction.Type = TransactionType.Sale;
+                    //Get items for transaction
+                    string line;
+                    do
+                    {
+                        int PID;
+                        Console.Write("Enter Item PID: ");
+                        line = Console.ReadLine();
+                        while (!int.TryParse(line, out PID))
+                        {
+                            if (line == "")
+                            {
+                                break;
+                            }
+                            Console.Write("Enter a valid PID or blank to finish: ");
+                            line = Console.ReadLine();
+                        }
+                        if (line == "")
+                        {
+                            break;
+                        }
+
+                        //Find item in db
+                        InventoryRecord dbitem = RecordDB.Inventory.Find(p => p.PID == PID);
+                        if (dbitem == null)
+                        {
+                            Console.WriteLine("Could not find an item with PID = {0}", PID);
+                            continue;
+                        }
+
+                        //Get number of said item
+                        uint quantity;
+                        Console.Write("Quantity: ");
+                        while (!uint.TryParse(Console.ReadLine(), out quantity))
+                        {
+                            Console.Write("Quantity: ");
+                        }
+                        //Copy the item into the transaction with the specified quantity
+                        InventoryRecord item = new InventoryRecord();
+                        item.PID = dbitem.PID;
+                        item.Price = dbitem.Price;
+                        item.Subcategory = dbitem.Subcategory;
+                        item.Title = dbitem.Title;
+                        item.Category = dbitem.Category;
+                        item.Description = dbitem.Description;
+                        item.Quantity = quantity;
+                        dbitem.Quantity -= quantity;
+
+
+                        newTransaction.Items.Add(item);
+                    } while (line != "");
+
+                    //Ask for discount
+                    Console.Write("Discount? (Member, Student, Employee, FoFree, Custom): ");
+                    line = Console.ReadLine();
+                    while (line != "Member" && line != "Student" && line != "Employee" && line != "FoFree" && line != "Custom" && line != "")
+                    {
+                        Console.Write("Discount? (Member, Student, Employee, FoFree, Custom): ");
+                        line = Console.ReadLine();
+                    }
+                    double discount = 0;
+                    if (line == "Member")
+                    {
+                        discount = .05;
+                    }
+                    else if (line == "Student")
+                    {
+                        discount = .01;
+                    }
+                    else if (line == "Employee")
+                    {
+                        discount = .33;
+                    }
+                    else if (line == "FoFree")
+                    {
+                        discount = 1;
+                    }
+                    else if (line == "Custom")
+                    {
+                        Console.Write("Please enter manager password: ");
+                        if (Console.ReadLine() != "123")
+                        {
+                            Console.WriteLine("Invalid password...");
+                        }
+                        Console.Write("Enter discount %: ");
+                        line = Console.ReadLine();
+                        while (!double.TryParse(line, out discount))
+                        {
+                            if (line == "")
+                            {
+                                break;
+                            }
+                            Console.Write("Enter discount %: ");
+                            line = Console.ReadLine();
+                        }
+                    }
+
+                    //Sum up total
+                    foreach (InventoryRecord i in newTransaction.Items)
+                    {
+                        newTransaction.Amount += (i.Price - i.Price * discount) * i.Quantity;
+                    }
+
+                    Console.WriteLine("Total:\t{0}", newTransaction.Amount);
+                    RecordDB.Transactions.Add(newTransaction);
+                    SaveDatabaseChanges();
                 }
                 else if (input == '2')
                 {
-                    transaction.Type = TransactionType.Return;
+                    newTransaction.Type = TransactionType.Return;
+
+                    string line;
+                    int TransactionID;
+                    Console.Write("Enter Transaction ID: ");
+                    line = Console.ReadLine();
+                    while (!int.TryParse(line, out TransactionID))
+                    {
+                        Console.Write("Enter Transaction ID: ");
+                        line = Console.ReadLine();
+                    }
+                    //Find Transaction in db
+                    Transaction OldTransaction = RecordDB.Transactions.Find(t => t.TransactionID == TransactionID);
+                    if (OldTransaction == null)
+                    {
+                        Console.WriteLine("Could not find a Transaction with ID = {0}", TransactionID);
+                    }
+
+                    //Get item(s) to return
+                    do
+                    {
+                        int PID;
+                        Console.Write("Enter Item PID: ");
+                        line = Console.ReadLine();
+                        while (!int.TryParse(line, out PID))
+                        {
+                            if (line == "")
+                            {
+                                break;
+                            }
+                            Console.Write("Enter a valid PID: ");
+                            line = Console.ReadLine();
+                        }
+                        if (line == "")
+                        {
+                            break;
+                        }
+
+                        //Find item in transaction
+                        InventoryRecord item = OldTransaction.Items.Find(p => p.PID == PID);
+                        if (item == null)
+                        {
+                            Console.WriteLine("Could not find an item with PID = {0}", PID);
+                            continue;
+                        }
+
+                        //Get number of said item to return
+                        uint quantity;
+                        Console.Write("Quantity: ");
+                        while (!uint.TryParse(Console.ReadLine(), out quantity))
+                        {
+                            Console.Write("Quantity: ");
+                        }
+
+                        //Copy the item into the transaction with the specified quantity
+                        InventoryRecord ReturnItem = new InventoryRecord(); //The item to be recorded on the new(return) transaction
+                        ReturnItem.PID = item.PID;
+                        ReturnItem.Price = item.Price;
+                        ReturnItem.Subcategory = item.Subcategory;
+                        ReturnItem.Title = item.Title;
+                        ReturnItem.Category = item.Category;
+                        ReturnItem.Description = item.Description;
+                        ReturnItem.Quantity = quantity;
+
+                        newTransaction.Items.Add(ReturnItem);
+                        newTransaction.Amount -= ReturnItem.Price * quantity;
+
+                    } while (line != "");
+
+                    Console.WriteLine("Total:\t{0}", newTransaction.Amount);
+                    RecordDB.Transactions.Add(newTransaction);
+                    SaveDatabaseChanges();
+                    
                 }
+
+                Console.WriteLine("Press any key to return to Transaction Menu...");
+                Console.ReadKey(true);
             } while (input != '0');
         }
 
