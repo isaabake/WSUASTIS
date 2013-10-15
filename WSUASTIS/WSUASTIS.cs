@@ -59,12 +59,13 @@ namespace WSUASTIS
                 Console.WriteLine("1) Inventory Search");
                 Console.WriteLine("2) Start Transaction");
                 Console.WriteLine("3) Edit Inventory");
+                Console.WriteLine("4) Print Receipt");
                 Console.WriteLine("0) Exit");
                 Console.WriteLine();
                 Console.Write("Enter Selection: ");
 
                 input = Console.ReadKey(true).KeyChar;
-                while (input != '1' && input != '2' && input != '3' && input != '0')
+                while (input != '1' && input != '2' && input != '3' && input != '4' && input != '0')
                 {
                     input = Console.ReadKey(true).KeyChar;
                 }
@@ -81,6 +82,10 @@ namespace WSUASTIS
                 else if (input == '3')
                 {
                     EditInventory();
+                }
+                else if (input == '4')
+                {
+                    PrintReceipt();
                 }
 
 
@@ -246,8 +251,7 @@ namespace WSUASTIS
                         item.Description = dbitem.Description;
                         item.Quantity = quantity;
                         dbitem.Quantity -= quantity;
-
-
+                                    
                         newTransaction.Items.Add(item);
                     } while (line != "");
 
@@ -409,7 +413,7 @@ namespace WSUASTIS
             {
                 using (StreamWriter receiptFile = new StreamWriter(string.Format("receipt_{0}.txt", TransactionID)))
                 {
-                    receiptFile.WriteLine("Transaction ID:\t{0}", trans.TransactionID);
+                    receiptFile.WriteLine("Transaction ID:\t\t{0}", trans.TransactionID);
                     receiptFile.WriteLine("Transaction Type:\t{0}", trans.Type.ToString());
                     receiptFile.WriteLine();
                     receiptFile.WriteLine("Items");
